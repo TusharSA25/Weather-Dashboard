@@ -4,3 +4,4 @@ node_modules/
 
 # Ignore environment variables file
 .env
+Weather-DashBoard/
