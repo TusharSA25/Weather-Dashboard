@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Weather Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Ensure the stylesheet is correctly linked -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header with Search -->
+    <header class="header">
+        <div class="header-content">
+            <h1>Live Weather Dashboard</h1>
+            <div class="header-search">
+                <form id="search-form" class="search-form">
+                    <div class="search-input-group">
+                        <input 
+                            type="text" 
+                            id="city-input" 
+                            placeholder="Search for a city..."
+                            required
+                        >
+                        <button type="submit" class="search-btn">
+                            <span class="search-icon">🔍</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Left Column - History and Info -->
+        <div class="left-column">
+            <!-- Search History -->
+            <div class="history-section">
+                <h3>Recent Searches</h3>
+                <div id="search-history" class="history-list">
+                    <!-- History items will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <hr class="divider">
+
+            <!-- Weather Alerts -->
+            <div class="weather-alerts">
+                <h3>Weather Alerts</h3>
+                <div id="alerts-content" class="alerts-list">
+                    <div class="alert-item">
+                        <span class="alert-icon">⚠️</span>
+                        <span class="alert-text">No active alerts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Air Quality -->
+            <div class="air-quality">
+                <h3>Air Quality</h3>
+                <div id="air-quality-content" class="air-quality-display">
+                    <div class="aq-placeholder">
+                        <span class="aq-icon">💨</span>
+                        <span>Search for air quality data</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Weather Information -->
+        <div class="right-column">
+            <!-- Current Weather -->
+            <div class="current-weather">
+                <h2>Current Weather</h2>
+                <div id="current-weather-content" class="weather-content">
+                    <div class="weather-placeholder">
+                        <div class="weather-icon">🌤️</div>
+                        <p>Search for a city to see current weather</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sunrise & Sunset Times -->
+            <div class="sun-times-section">
+                <h3>Sun Times</h3>
+                <div id="sun-times-content">
+                    <div class="sun-times-container">
+                        <div class="sun-time">
+                            <div class="sun-time-label">Sunrise</div>
+                            <div class="sun-time-value">--:--</div>
+                        </div>
+                        <div class="sun-time">
+                            <div class="sun-time-label">Sunset</div>
+                            <div class="sun-time-value">--:--</div>
+                        </div>
+                    </div>
+                    <div class="daylight-progress">
+                        <div class="daylight-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UV Index & Health Tips -->
+            <div class="uv-section">
+                <h3>UV Index</h3>
+                <div id="uv-content">
+                    <div class="uv-container">
+                        <div class="uv-value uv-low">0</div>
+                        <div class="uv-label">Low</div>
+                        <div class="uv-bar">
+                            <div class="uv-progress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clothing Suggestions -->
+            <div class="clothing-section">
+                <h3>Clothing Suggestions</h3>
+                <div id="clothing-content">
+                    <div class="clothing-suggestions">
+                        <div class="clothing-item">
+                            <span class="clothing-icon">👕</span>
+                            <div class="clothing-text">Search for weather to get clothing suggestions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Map Section -->
+            <div class="weather-map-section">
+                <h2>Weather Map</h2>
+                <div class="map-container">
+                    <div class="map-left">
+                        <h3>Temperature Map</h3>
+                        <img id="temperature-map" src="" alt="Temperature Map" class="map-image" />
+                    </div>
+                    <div class="map-right">
+                        <h3>Precipitation Map</h3>
+                        <img id="precipitation-map" src="" alt="Precipitation Map" class="map-image" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5-Day Forecast -->
+            <div class="forecast-section">
+                <h2>5-Day Forecast</h2>
+                <div id="forecast-content" class="forecast-container">
+                    <div class="forecast-placeholder">
+                        <div class="forecast-icon">📅</div>
+                        <p>Search for a city to see 5-day forecast</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hourly Forecast -->
+            <div class="hourly-forecast-section">
+                <h2>Hourly Forecast</h2>
+                <div id="hourly-forecast-content" class="hourly-container">
+                    <div class="hourly-scroll">
+                        <div class="hourly-placeholder">
+                            <div class="hourly-icon">⏰</div>
+                            <p>Detailed hourly forecast will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Ensure the script is correctly linked -->
+    <script src="script.js" defer></script>
+</body>
+</html>
