@@ -17,7 +17,20 @@ body {
     position: relative;
     transition: background 1s ease-in-out;
 }
-
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+.component {
+  width: 300px; /* adjust the width as needed */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 /* Dynamic Weather Backgrounds */
 body.weather-sunny {
     background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 25%, #ffd93d 50%, #ff8e53 75%, #ff6b35 100%);
@@ -256,11 +269,13 @@ body::before {
 
 /* Main Content Layout */
 .main-content {
-    display: flex;
-    max-width: 1400px;
+    display: flex; /* This enables the use of flexbox properties */
+    width: 100%; /* Occupies the full width of its parent */
+    max-width: 1400px; /* Maximum width to prevent excessive stretching */
     margin: 2rem auto;
     gap: 2rem;
     padding: 0 2rem;
+    box-sizing: border-box; /* Includes padding and border in the element's total width and height */
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
@@ -279,8 +294,9 @@ body::before {
 
 /* Left Column - History and Info */
 .left-column {
-    flex: 0 0 300px;
+    flex: 0 0 300px; /* Does not grow, does not shrink, initial width of 300px */
     background: rgba(26, 26, 46, 0.95);
+    width: 300px;
     backdrop-filter: blur(20px);
     border-radius: 24px;
     padding: 2rem;
@@ -501,39 +517,23 @@ body::before {
 }
 
 /* Auto-complete Suggestions */
-/* Suggestions Container Enhancement */
-.suggestion-item {
-    padding: 1rem;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    transition: all 0.3s ease;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(12px);
-    border-radius: 8px;
-    margin: 0.2rem;
+.suggestions-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(26, 26, 46, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(100, 150, 255, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    z-index: 10000;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+    margin-top: 0.5rem;
+    min-width: 300px;
 }
-.suggestion-item:hover {
-    background: rgba(255,255,255,0.1);
-    transform: translateX(6px);
-}
-
-/* Forecast & Hourly Card Hover */
-.forecast-card, .hourly-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.forecast-card:hover, .hourly-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-/* Search bar input focus polish */
-#city-input:focus {
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding-left: 8px;
-    transition: all 0.3s ease;
-}
-
 
 /* Header search positioning for suggestions */
 .header-search {
@@ -685,7 +685,8 @@ body::before {
 
 /* Right Column - Weather Information */
 .right-column {
-    flex: 1;
+    flex: 1; /* Allows the right column to grow and take up remaining space */
+    width: calc(100% - 320px); /* Adjust width calculation */
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -1361,7 +1362,7 @@ body::before {
     .left-column {
         flex: 0 0 280px;
     }
-    
+
     .forecast-card {
         flex: 0 0 160px;
     }
@@ -1372,51 +1373,49 @@ body::before {
         flex-direction: column;
         gap: 1.5rem;
         text-align: center;
-    }
-    
+    }    
     .header h1 {
         font-size: 2rem;
     }
-    
+
     .search-input-group input {
         min-width: 200px;
     }
-    
+
     .main-content {
         flex-direction: column;
         max-width: 800px;
-        gap: 1.5rem;
+        gap: 2rem;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     .left-column {
         flex: none;
         width: 100%;
         max-width: 500px;
         margin: 0 auto;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
+    }    
     .right-column {
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     .forecast-container {
         justify-content: center;
         flex-wrap: wrap;
         gap: 1rem;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     .forecast-card {
         flex: 0 0 150px;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
+    }    
     .weather-details {
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 1rem;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 100%;
     }
 }
 
@@ -1430,7 +1429,7 @@ body::before {
     
     .header h1 {
         font-size: 2.2rem;
-        transition: font-size 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .forecast-card {
@@ -1574,7 +1573,7 @@ body::before {
     
     .city-info h3 {
         font-size: 2rem;
-        transition: font-size 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .weather-detail .value {
@@ -1631,7 +1630,7 @@ body::before {
     
     .city-info h3 {
         font-size: 1.8rem;
-        transition: font-size 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .weather-detail .value {
@@ -1853,6 +1852,3 @@ body::before {
     height: 2px;
     background: linear-gradient(90deg, #e74c3c, #c0392b);
 }
-
-
-

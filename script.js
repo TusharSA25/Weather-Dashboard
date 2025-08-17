@@ -463,7 +463,7 @@ class WeatherDashboard {
                 return;
             }
 
-            const zoom = 5;
+            const zoom = 4;
             
             // Temperature map
             const tempMapUrl = `https://tile.openweathermap.org/map/temp_new/${zoom}/${this.getTileX(lon, zoom)}/${this.getTileY(lat, zoom)}.png?appid=${apiKey}`;
@@ -476,6 +476,7 @@ class WeatherDashboard {
             
             if (tempMapElement) {
                 tempMapElement.src = tempMapUrl;
+                tempMapElement.style.display = 'block';
                 tempMapElement.onerror = () => {
                     tempMapElement.style.display = 'none';
                     console.error('Failed to load temperature map');
@@ -484,6 +485,7 @@ class WeatherDashboard {
             
             if (precipMapElement) {
                 precipMapElement.src = precipMapUrl;
+                precipMapElement.style.display = 'block';
                 precipMapElement.onerror = () => {
                     precipMapElement.style.display = 'none';
                     console.error('Failed to load precipitation map');
@@ -1028,7 +1030,10 @@ class WeatherDashboard {
 document.addEventListener('DOMContentLoaded', () => {
     window.weatherDashboard = new WeatherDashboard();
     console.log('Weather Dashboard loaded successfully!');
+
 });
+
+
 
 // Add some helpful console messages
 console.log('Weather Dashboard JavaScript loaded!');

@@ -11,12 +11,374 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="main-container">
     <!-- Header with Search -->
     <header class="header">
         <div class="header-content">
             <h1>Live Weather Dashboard</h1>
             <div class="header-search">
-                <form id="search-form" class="search-form">
+// src/api.js
+const baseUrl = window.location.origin; // Use the current server
+
+async function fetchCurrentWeather(city) {
+    const response = await fetch(
+        `${baseUrl}/api/weather/${encodeURIComponent(city)}`
+    );
+    
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `City not found: `);
+    }
+    
+    return await response.json();
+}
+
+async function fetchForecast(city) {
+    const response = await fetch(
+        `/api/forecast/${encodeURIComponent(city)}`
+    );
+    
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Forecast not found for: `);
+    }
+    
+    return await response.json();
+}
+
+async function fetchHourlyForecast(city) {
+    try {
+        const response = await fetch(`/api/forecast/${encodeURIComponent(city)}`);
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Error fetching hourly forecast:', error);
+    }
+    return [];
+}
+
+async function fetchAirQuality(city) {
+    try {
+        const response = await fetch(`/api/air-quality/${encodeURIComponent(city)}`);
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Error fetching air quality:', error);
+    }
+    return null;
+}
+
+async function fetchAlerts(city) {
+    try {
+        const response = await fetch(`/api/alerts/${encodeURIComponent(city)}`);
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Error fetching alerts:', error);
+    }
+    return { alerts: [] };
+}
+
+async function fetchSuggestions(query) {
+    try {
+        const response = await fetch(`/api/suggestions/${encodeURIComponent(query)}`);
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        return [];
+    }
+}
+
+async function getApiKey() {
+    try {
+        const response = await fetch(`/api/config`);
+        if (!response.ok) {
+            console.error('Failed to fetch API key from server.');
+            return null;
+        }
+        const data = await response.json();
+        return data.OPENWEATHER_API_KEY;
+    } catch (error) {
+        console.error('Error fetching API key:', error);
+        return null;
+    }
+}
+
+
+export { fetchCurrentWeather, fetchForecast, fetchHourlyForecast, fetchAirQuality, fetchAlerts, fetchSuggestions, getApiKey, baseUrl };
+// src/dom.js
+function displayCurrentWeather(weatherData) {
+    const container = document.getElementById('current-weather-content');
+    if (!container) {
+        console.error('Current weather container not found');
+        return;
+    }
+    
+    const currentDate = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    container.innerHTML = `
+        <div class="city-info">
+            <h3>${weatherData.name}</h3>
+            <div class="date"></div>
+        </div>
+        <div class="weather-details">
+            <div class="weather-detail temperature">
+                <div class="weather-icon">🌡️</div>
+                <h4>Temperature</h4>
+                <div class="value">
+                    <span>${Math.round(weatherData.main.temp)}</span>
+                    <span class="unit">°C</span>
+                </div>
+            </div>
+            <div class="weather-detail humidity">
+                <div class="weather-icon">💧</div>
+                <h4>Humidity</h4>
+                <div class="value">
+                    <span>${weatherData.main.humidity}</span>
+                    <span class="unit">%</span>
+                </div>
+            </div>
+            <div class="weather-detail wind">
+                <div class="weather-icon">💨</div>
+                <h4>Wind Speed</h4>
+                <div class="value">
+                    <span>${Math.round(weatherData.wind.speed * 3.6)}</span>
+                    <span class="unit">KPH</span>
+                </div>
+            </div>
+            <div class="weather-detail weather">
+                <div class="weather-icon">${getWeatherIcon(weatherData.weather[0].main)}</div>
+                <h4>Weather</h4>
+                <span class="value">${weatherData.weather[0].description}</span>
+            </div>
+        </div>
+    `;
+}
+
+function displayForecast(forecastData) {
+    const container = document.getElementById('forecast-content');
+    if (!container) {
+        console.error('Forecast container not found');
+        return;
+    }
+    
+    if (!forecastData || forecastData.length === 0) {
+        container.innerHTML = '<div class="forecast-placeholder"><p>No forecast data available</p></div>';
+        return;
+    }
+
+    const forecastHTML = forecastData.map(day => {
+        const dayName = day.date.toLocaleDateString('en-US', { weekday: 'short' });
+        const date = day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        return `
+            <div class="forecast-card">
+                <div class="day"></div>
+                <div class="date"></div>
+                <div class="temp">${day.temp}°C</div>
+                <div class="description">${day.description}</div>
+                <div class="details">
+                    <div>Humidity: ${day.humidity}%</div>
+                    <div>Wind: ${day.windSpeed} KPH</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = forecastHTML;
+}
+
+function displayHourlyForecast(hourlyData) {
+    const container = document.getElementById('hourly-forecast-content');
+    if (!container) {
+        console.error('Hourly forecast container not found');
+        return;
+    }
+    
+    if (!hourlyData || hourlyData.length === 0) {
+        container.innerHTML = `
+            <div class="hourly-scroll">
+                <div class="hourly-placeholder">
+                    <div class="hourly-icon">⏰</div>
+                    <p>No hourly forecast available</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const hourlyHTML = hourlyData.map(hour => {
+        const time = hour.time.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
+        
+        return `
+            <div class="hourly-card">
+                <div class="hourly-time"></div>
+                <div class="hourly-icon">${hour.icon}</div>
+                <div class="hourly-temp">${hour.temp}°C</div>
+                <div class="hourly-desc">${hour.description}</div>
+                <div class="hourly-details">
+                    <div>💧 ${hour.humidity}%</div>
+                    <div>💨 ${hour.windSpeed} KPH</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `<div class="hourly-scroll"></div>`;
+}
+
+function displayAirQuality(airQualityData) {
+    const container = document.getElementById('air-quality-content');
+    if (!container) {
+        console.error('Air quality container not found');
+        return;
+    }
+    
+    if (!airQualityData || !airQualityData.airQuality) {
+        container.innerHTML = `
+            <div class="aq-placeholder">
+                <span class="aq-icon">💨</span>
+                <span>Air quality data not available</span>
+            </div>
+        `;
+        return;
+    }
+
+    const aq = airQualityData.airQuality.list[0];
+    const aqi = aq.main.aqi;
+    const components = aq.components;
+    
+    let aqiText, aqiColor;
+    switch(aqi) {
+        case 1: aqiText = 'Good'; aqiColor = '#4CAF50'; break;
+        case 2: aqiText = 'Fair'; aqiColor = '#FF9800'; break;
+        case 3: aqiText = 'Moderate'; aqiColor = '#FF5722'; break;
+        case 4: aqiText = 'Poor'; aqiColor = '#9C27B0'; break;
+        case 5: aqiText = 'Very Poor'; aqiColor = '#7B1FA2'; break;
+        default: aqiText = 'Unknown'; aqiColor = '#9E9E9E';
+    }
+
+    container.innerHTML = `
+        <div class="aq-display">
+            <div class="aq-main">
+                <div class="aq-value" style="color: "></div>
+                <div class="aq-label" style="color: "></div>
+            </div>
+            <div class="aq-details">
+                <div class="aq-component">
+                    <span class="component-name">PM2.5:</span>
+                    <span class="component-value">${components.pm2_5} µg/m³</span>
+                </div>
+                <div class="aq-component">
+                    <span class="component-name">PM10:</span>
+                    <span class="component-value">${components.pm10} µg/m³</span>
+                </div>
+                <div class="aq-component">
+                    <span class="component-name">NO₂:</span>
+                    <span class="component-value">${components.no2} µg/m³</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displayAlerts(alertsData) {
+    const container = document.getElementById('alerts-content');
+    if (!container) {
+        console.error('Alerts container not found');
+        return;
+    }
+    
+    if (!alertsData.alerts || alertsData.alerts.length === 0) {
+        container.innerHTML = `
+            <div class="alert-item">
+                <span class="alert-icon">✅</span>
+                <span class="alert-text">No active weather alerts</span>
+            </div>
+        `;
+        return;
+    }
+
+    const alertsHTML = alertsData.alerts.map(alert => `
+        <div class="alert-item alert-active">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-content">
+                <div class="alert-title">${alert.event}</div>
+                <div class="alert-description">${alert.description}</div>
+                <div class="alert-time">Until: ${new Date(alert.end).toLocaleString()}</div>
+            </div>
+        </div>
+    `).join('');
+
+    container.innerHTML = alertsHTML;
+}
+
+function displaySuggestions(suggestions) {
+    const suggestionsContainer = document.getElementById('suggestions-container');
+    if (!suggestionsContainer) {
+        createSuggestionsContainer();
+    }
+    
+    const container = document.getElementById('suggestions-container');
+    if (!container) {
+        console.error('Suggestions container not found');
+        return;
+    }
+    
+    if (suggestions.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    // Create suggestions without inline event handlers
+    const suggestionsHTML = suggestions.map((suggestion, index) => `
+        <div class="suggestion-item" data-city="${suggestion.displayName}" data-index="">
+            <span class="suggestion-name">${suggestion.name}</span>
+            <span class="suggestion-location">${suggestion.state ? suggestion.state + ', ' : ''}${suggestion.country}</span>
+        </div>
+    `).join('');
+
+    container.innerHTML = suggestionsHTML;
+    container.style.display = 'block';
+}
+
+function createSuggestionsContainer() {
+    const headerSearch = document.querySelector('.header-search');
+    if (!headerSearch) {
+        console.error('Header search container not found');
+        return;
+    }
+    
+    const suggestionsContainer = document.createElement('div');
+    suggestionsContainer.id = 'suggestions-container';
+    suggestionsContainer.className = 'suggestions-container';
+    headerSearch.appendChild(suggestionsContainer);
+}
+
+function showLoading() {
+    const currentWeatherContainer = document.getElementById('current-weather-content');
+    const forecastContainer = document.getElementById('forecast-content');
+    
+    if (currentWeatherContainer) {
+        currentWeatherContainer.innerHTML = '<div class="loading">Loading current weather...</div>';
+    }
+    if (forecastContainer) {
+        forecastContainer.innerHTML = '<div class="loading">Loading forecast...</div>';
+                <form id="search-form" class="search-form" role="search">
                     <div class="search-input-group">
                         <input 
                             type="text" 
@@ -25,7 +387,7 @@
                             required
                         >
                         <button type="submit" class="search-btn">
-                            <span class="search-icon">🔍</span>
+                            <span class="search-icon" aria-label="Search">🔍</span>                        
                         </button>
                     </div>
                 </form>
@@ -137,11 +499,11 @@
                 <div class="map-container">
                     <div class="map-left">
                         <h3>Temperature Map</h3>
-                        <img id="temperature-map" src="" alt="Temperature Map" class="map-image" />
+                        <img id="temperature-map" src="" alt="Temperature map of the current city" class="map-image" />
                     </div>
                     <div class="map-right">
                         <h3>Precipitation Map</h3>
-                        <img id="precipitation-map" src="" alt="Precipitation Map" class="map-image" />
+                        <img id="precipitation-map" src="" alt="Precipitation map of the current city" class="map-image" />
                     </div>
                 </div>
             </div>
@@ -171,7 +533,7 @@
             </div>
         </div>
     </main>
-
+    </div>
     <!-- Ensure the script is correctly linked -->
     <script src="script.js" defer></script>
 </body>
